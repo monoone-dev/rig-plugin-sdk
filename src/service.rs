@@ -161,3 +161,29 @@ impl<R: BufRead, W: Write> Session<R, W> {
         }
     }
 }
+
+#[must_use]
+pub fn encode_request(id: u64, method: &str, params: Value) -> Vec<u8> {
+    let mut bytes = serde_json::to_vec(&request(id, method, params)).unwrap_or_default();
+    bytes.push(b'\n');
+    bytes
+}
+
+#[must_use]
+pub fn decode_reply(line: &[u8], id: u64) -> Option<Result<Value, CallError>> {
+    let value = serde_json::from_slice::<Value>(line).ok()?;
+    if value.get("method").is_some() {
+        return None;
+    }
+    let reply: Response = serde_json::from_value(value).ok()?;
+    if reply.id != id {
+        return None;
+    }
+    Some(match reply.error {
+        Some(error) => Err(CallError::Refused {
+            code: error.code,
+            message: error.message,
+        }),
+        None => Ok(reply.result.unwrap_or(Value::Null)),
+    })
+}
