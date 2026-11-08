@@ -1,3 +1,4 @@
+use serde::Serialize;
 use serde_json::Value;
 
 use super::model::{
@@ -127,4 +128,43 @@ pub(crate) fn tool_said(outcome: Result<String, String>) -> Value {
         "content": [{ "type": "text", "text": text }],
         "isError": is_error
     })
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SignedFields<'a> {
+    id: &'a str,
+    version: &'a str,
+    platform: &'a str,
+    sha256: &'a str,
+    manifest_sha256: &'a str,
+}
+
+#[must_use]
+pub fn this_platform() -> String {
+    let os = match std::env::consts::OS {
+        "macos" => "apple-darwin",
+        "linux" => "unknown-linux-gnu",
+        "windows" => "pc-windows-msvc",
+        other => other,
+    };
+    format!("{}-{os}", std::env::consts::ARCH)
+}
+
+#[must_use]
+pub fn signed_message(
+    id: &str,
+    version: &str,
+    platform: &str,
+    sha256: &str,
+    manifest_sha256: &str,
+) -> String {
+    serde_json::to_string(&SignedFields {
+        id,
+        version,
+        platform,
+        sha256,
+        manifest_sha256,
+    })
+    .unwrap_or_default()
 }
