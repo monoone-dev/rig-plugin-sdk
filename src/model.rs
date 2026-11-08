@@ -113,3 +113,74 @@ pub struct Tool {
     pub description: String,
     pub input_schema: Value,
 }
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChoiceOption {
+    pub value: String,
+    pub label: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum SettingField {
+    Text {
+        key: String,
+        label: String,
+        #[serde(default)]
+        help: String,
+        #[serde(default)]
+        value: String,
+    },
+    SecretName {
+        key: String,
+        label: String,
+        #[serde(default)]
+        help: String,
+        #[serde(default)]
+        saved: bool,
+    },
+    Switch {
+        key: String,
+        label: String,
+        #[serde(default)]
+        help: String,
+        #[serde(default)]
+        value: bool,
+    },
+    Choice {
+        key: String,
+        label: String,
+        #[serde(default)]
+        help: String,
+        #[serde(default)]
+        options: Vec<ChoiceOption>,
+        #[serde(default)]
+        value: String,
+    },
+    Number {
+        key: String,
+        label: String,
+        #[serde(default)]
+        help: String,
+        #[serde(default)]
+        value: f64,
+        #[serde(default)]
+        min: Option<f64>,
+        #[serde(default)]
+        max: Option<f64>,
+    },
+    #[serde(other)]
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SettingsDescription {
+    #[serde(default)]
+    pub fields: Vec<SettingField>,
+}
