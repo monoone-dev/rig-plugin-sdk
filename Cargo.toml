@@ -1,10 +1,14 @@
 [package]
 name = "rig-plugin-sdk"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-license.workspace = true
-publish.workspace = true
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.96"
+license = "MIT OR Apache-2.0"
+description = "Write RigOne plugins in Rust: the plugin protocol, a stdio loop and WebAssembly bindings"
+repository = "https://github.com/monoone-dev/rig-plugin-sdk"
+readme = "README.md"
+keywords = ["rigone", "plugin", "webassembly", "json-rpc", "mcp"]
+categories = ["development-tools", "wasm"]
 
 [lib]
 doctest = false
@@ -14,14 +18,27 @@ name = "rig-plugin-echo"
 path = "src/bin/rig-plugin-echo.rs"
 test = false
 
-[lints]
-workspace = true
-
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-serde_json = "=1.0.151"
+serde_json = "1"
 thiserror = "2"
 wit-bindgen = { version = "0.63.0", optional = true }
 
 [features]
 wasm = ["dep:wit-bindgen"]
+
+[lints.rust]
+unsafe_code = "deny"
+unused_must_use = "deny"
+missing_debug_implementations = "warn"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+panic = "deny"
+todo = "deny"
+dbg_macro = "deny"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"

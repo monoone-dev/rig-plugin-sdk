@@ -3,20 +3,26 @@
 Write plugins for RigOne in Rust. A plugin can be a native program (MonoOne's own plugins) or a
 WebAssembly component (every other publisher). Both speak the same protocol to RigOne.
 
-## A WebAssembly plugin in four commands
+## Add it to a plugin
+
+```toml
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rig-plugin-sdk = { version = "0.1", features = ["wasm"] }
+```
+
+Build the plugin as a WebAssembly component:
 
 ```bash
 rustup target add wasm32-wasip2
-rigone plugin new hello-desk
-rigone plugin build hello-desk
-rigone plugin keygen ~/.rigone/publisher.key
-rigone plugin sign hello-desk/dist/hello-desk-0.1.0-wasm.rigplugin --key ~/.rigone/publisher.key
+cargo build --release --target wasm32-wasip2
 ```
 
-`new` makes a project with `Cargo.toml`, `manifest.json` and `src/lib.rs`. `build` compiles it to
-a component, puts it next to its manifest in `dist/<id>/` and packs both into
-`dist/<id>-<version>-wasm.rigplugin`. `sign` prints the text MonoOne checks and your signature of
-it. Keep the key file private; RigOne never overwrites one.
+Put the `.wasm` file next to a `manifest.json` (`"format": "wasm"`, `"entry": "plugin.wasm"`). The
+`rigone plugin` command that makes, builds, packs and signs a plugin in one step is coming to this
+repository; until then RigOne's team publishes plugins for you.
 
 ## What a plugin implements
 
@@ -59,3 +65,8 @@ Only what RigOne gives it, through `host`:
 A plugin cannot read other files, start programs, open network connections itself or read
 environment variables. One call may use 128 MB of memory and 10 seconds; after that RigOne stops
 it and says so. The interface is `wit/plugin.wit` (`rigone:plugin@1`).
+
+## License
+
+Licensed under either of [Apache License 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT), at your
+option. A plugin built with this SDK may use any license.
