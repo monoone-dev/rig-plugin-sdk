@@ -184,3 +184,14 @@ pub struct SettingsDescription {
     #[serde(default)]
     pub fields: Vec<SettingField>,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TriggerItem {
+    pub id: String,
+    pub identifier: String,
+    pub title: String,
+    pub url: String,
+    pub body: String,
+    pub updated_at: String,
+}

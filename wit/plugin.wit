@@ -1,0 +1,38 @@
+package rigone:plugin@1.0.0;
+
+interface host {
+    record http-request {
+        method: string,
+        url: string,
+        headers: list<tuple<string, string>>,
+        body: option<string>,
+    }
+
+    record http-response {
+        status: u16,
+        body: string,
+    }
+
+    fetch: func(request: http-request) -> result<http-response, string>;
+    secret: func(name: string) -> option<string>;
+    data-read: func(path: string) -> result<list<u8>, string>;
+    data-write: func(path: string, bytes: list<u8>) -> result<_, string>;
+    data-list: func() -> result<list<string>, string>;
+    log: func(line: string);
+    notify: func(sentence: string);
+    now-ms: func() -> u64;
+}
+
+interface guest {
+    initialize: func(granted: string) -> result<_, string>;
+    settings-describe: func() -> result<string, string>;
+    settings-apply: func(values: string) -> result<_, string>;
+    trigger-items: func(source: string, condition: string) -> result<string, string>;
+    tools-list: func() -> string;
+    tools-call: func(name: string, arguments: string) -> result<string, string>;
+}
+
+world plugin {
+    import host;
+    export guest;
+}
