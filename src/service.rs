@@ -3,9 +3,12 @@ use std::io::{self, BufRead, Write};
 use serde::Serialize;
 use serde_json::Value;
 
-use super::logic::{Incoming, answered, incoming, initialized, request, response};
+use super::logic::{
+    Incoming, answered, incoming, initialized, mcp_hello, request, response, tool_said,
+};
 use super::model::{
-    Answer, CallError, ErrorObject, MOST_MESSAGE_BYTES, PluginInfo, Response, TOO_LARGE, method,
+    Answer, CallError, ErrorObject, MOST_MESSAGE_BYTES, PluginInfo, Response, TOO_LARGE, Tool,
+    method,
 };
 
 enum Line {
@@ -185,5 +188,31 @@ pub fn decode_reply(line: &[u8], id: u64) -> Option<Result<Value, CallError>> {
             message: error.message,
         }),
         None => Ok(reply.result.unwrap_or(Value::Null)),
+    })
+}
+
+pub fn serve_tools<R, W, F>(
+    reader: R,
+    writer: W,
+    info: &PluginInfo,
+    tools: &[Tool],
+    call: F,
+) -> io::Result<()>
+where
+    R: BufRead,
+    W: Write,
+    F: FnMut(&str, Value) -> Result<String, String>,
+{
+    let mut call = call;
+    serve(reader, writer, info, |method, params| match method {
+        "initialize" => Answer::Done(mcp_hello(info, &params)),
+        "ping" => Answer::Done(Value::Object(serde_json::Map::new())),
+        "tools/list" => Answer::Done(serde_json::json!({ "tools": tools })),
+        "tools/call" => {
+            let name = params["name"].as_str().unwrap_or_default().to_owned();
+            let arguments = params.get("arguments").cloned().unwrap_or(Value::Null);
+            Answer::Done(tool_said(call(&name, arguments)))
+        }
+        _ => Answer::Unknown,
     })
 }

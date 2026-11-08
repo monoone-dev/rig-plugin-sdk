@@ -1,1 +1,2 @@
+mod a_plugin_gives_agents_tools;
 mod a_plugin_process_answers_the_host;

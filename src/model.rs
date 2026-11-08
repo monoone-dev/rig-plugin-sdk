@@ -101,3 +101,15 @@ pub enum CallError {
     #[error("the plugin could not be reached: {0}")]
     Io(#[from] std::io::Error),
 }
+
+pub const TOOLS_ARGUMENT: &str = "mcp";
+
+pub const MCP_PROTOCOL: &str = "2025-06-18";
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Tool {
+    pub name: String,
+    pub description: String,
+    pub input_schema: Value,
+}

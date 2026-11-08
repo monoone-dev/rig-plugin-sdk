@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use super::model::{
-    Answer, ErrorObject, FAILED, INVALID_REQUEST, InitializeParams, InitializeResult,
+    Answer, ErrorObject, FAILED, INVALID_REQUEST, InitializeParams, InitializeResult, MCP_PROTOCOL,
     METHOD_NOT_FOUND, PARSE_ERROR, PROTOCOL, PluginInfo, Request, Response, UNSUPPORTED_PROTOCOL,
 };
 
@@ -107,4 +107,24 @@ pub(crate) fn request(id: u64, method: &str, params: Value) -> Request {
         method: method.to_owned(),
         params,
     }
+}
+
+pub(crate) fn mcp_hello(info: &PluginInfo, params: &Value) -> Value {
+    let protocol = params["protocolVersion"].as_str().unwrap_or(MCP_PROTOCOL);
+    serde_json::json!({
+        "protocolVersion": protocol,
+        "capabilities": { "tools": {} },
+        "serverInfo": { "name": info.id, "version": info.version }
+    })
+}
+
+pub(crate) fn tool_said(outcome: Result<String, String>) -> Value {
+    let (text, is_error) = match outcome {
+        Ok(text) => (text, false),
+        Err(text) => (text, true),
+    };
+    serde_json::json!({
+        "content": [{ "type": "text", "text": text }],
+        "isError": is_error
+    })
 }
