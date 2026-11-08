@@ -30,7 +30,7 @@ fn start() -> Result<Plugin, Box<dyn Error>> {
 fn hello(protocol: u32) -> InitializeParams {
     InitializeParams {
         protocol,
-        rig_one_version: "1.15.1".to_owned(),
+        rig_one_version: "1.15.2".to_owned(),
         language: "en".to_owned(),
         granted: Granted::default(),
     }
